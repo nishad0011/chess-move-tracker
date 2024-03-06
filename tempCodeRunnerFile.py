@@ -1,0 +1,1 @@
+min(l-mn,mx-(l-mn))
