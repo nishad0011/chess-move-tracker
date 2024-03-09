@@ -1,3 +1,4 @@
+import sys,ast
 
 """ def lerp(mn , mx, x):
     l = (mx-mn)*x
@@ -22,5 +23,15 @@ d1 ={0: ['black-bishop', (145.229, 64.5175, 25.3485, 62.5342)],
     12: ['black-bishop', (222.3599, 224.1397, 28.1539, 62.5126)], 
     13: ['white-rook', (210.6001, 399.0271, 40.2375, 33.9459)]}
 
-for i in d1.values():
-    print(int(i[1][1])) 
+""" for i in d1.items():
+    print(i[1][1][1]) """
+
+ #print(sys.maxsize)
+# print(abs(1.23))
+
+s = "[(118, 73), (443, 78), (498, 485)]"
+
+edge_coords=ast.literal_eval(s)
+print(edge_coords[1])
+""" for i in list(s):
+    print(i) """
