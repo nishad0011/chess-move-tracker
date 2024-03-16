@@ -16,8 +16,8 @@ thickness = 2
 
 edge_coords=[]
 square_coords = {}
-movelist0 = {}
-movelist1 = {}
+movelist0 = []
+movelist1 = []
 				
 def lerp(min, max, x) :
     return min + ((max - min) * x)
@@ -27,9 +27,14 @@ def lerp2(mn , mx, x):
     le = 2*min(l ,mx-(l+mn))
     return int(mn+le)
 
-path = r'Z:\Program Code\Python\Chess\move0.jpg'
-img = cv2.imread(path, 1)
+path1 = r'Z:\Program Code\Python\Chess\move0.jpg'
+img = cv2.imread(path1, 1)
+
+path2 = r'Z:\Program Code\Python\Chess\move1.jpg'
+img2 = cv2.imread(path2, 1)
+
 img = cv2.resize(img, (600, 600), interpolation = cv2.INTER_LINEAR)
+img2 = cv2.resize(img2, (600, 600), interpolation = cv2.INTER_LINEAR)
 
 def Capture_Event(event, x, y, flags, params):
 	# If the left mouse button is pressed
@@ -65,8 +70,6 @@ def set_squares():
 		co = (int(x) , int(y))
 
 		square_coords["a{x}".format(x=i+1)] = co
-
-
 		img = cv2.circle(img, co, radius, color, thickness)
 
 	# Finding h-file coordinates
@@ -107,22 +110,15 @@ radius = 5
 font = cv2.FONT_HERSHEY_SIMPLEX 
 fontScale = 0.5
 			
-file_size = os.path.getsize("yolodictionary.txt")
 
-if (file_size == 0):
-	print("Running model on image")
-	yolo_dict = run_yolo(model,img)
-	print("model done")
+print("Running model on image")
+yolo_dict = run_yolo(model,img)
+print("model done")
 
-	file1 = open("yolodictionary.txt", "w")
-	L = str(yolo_dict)
-	file1.writelines(L)
-	file1.close()
-else:
-	print("Skipped Running model")
-	file1 = open("yolodictionary.txt", "r")
-	yolo_dict = dict(literal_eval(file1.read()))
-	file1.close()
+file1 = open("yolodictionary.txt", "w")
+L = str(yolo_dict)
+file1.writelines(L)
+file1.close()
 
 for i in yolo_dict.items():
 	x = round(i[1][1][0] - 0.5*i[1][1][2])
@@ -152,9 +148,54 @@ for i in yolo_dict.items():
 			sq = j[0]
 	
 	# print(f"piece:{i[1][0]} is on {sq}, dist: {min}")
-	movelist0[f'{i[1][0]}'] = sq
+	movelist0.append((i[1][0],sq))
 	img = cv2.line(img, center_of_piece, square_coords[sq], (0,0,255), thickness) 
 
 cv2.imshow('img',img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+
+print("Running model on image")
+yolo_dict2 = run_yolo(model,img2)
+print("model done")
+file1 = open("yolodictionary2.txt", "w")
+L = str(yolo_dict2)
+file1.writelines(L)
+file1.close()
+
+for i in yolo_dict2.items():
+	x = round(i[1][1][0] - 0.5*i[1][1][2])
+	y = round(i[1][1][1] - 0.5*i[1][1][3])
+	wid = round(i[1][1][2])
+	hei = round(i[1][1][3])
+
+	center_of_piece = (round(x+wid*0.5),round(y+hei*0.8))
+
+	#Lables
+	# img  = cv2.putText(img, i[0], co, font, fontScale, color, thickness, cv2.LINE_AA) 
+
+	#Bounding box 
+	img2 = cv2.rectangle(img2, (x,y), (x+wid,y+hei), color, thickness)
+
+	#circles
+	img2 = cv2.circle(img2,center_of_piece,radius,color,thickness)
+
+	min = sys.maxsize
+	sq = "Null"
+	for j in square_coords.items():
+		dist = abs( 
+			((center_of_piece[0]-j[1][0])**2 + (center_of_piece[1]-j[1][1])**2)**0.5
+		 )
+		if (dist<min):
+			min = dist
+			sq = j[0]
+	
+	# print(f"piece:{i[1][0]} is on {sq}, dist: {min}")
+	movelist1.append((i[1][0],sq))
+	img2 = cv2.line(img2, center_of_piece, square_coords[sq], (0,0,255), thickness) 
+
+cv2.imshow('img2',img2)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
