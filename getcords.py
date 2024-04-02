@@ -195,6 +195,8 @@ for i in yolo_dict2.items():
 	movelist1.append((i[1][0],sq))
 	img2 = cv2.line(img2, center_of_piece, square_coords[sq], (0,0,255), thickness) 
 
+print(movelist0)
+print(movelist1)
 cv2.imshow('img2',img2)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

@@ -1,11 +1,11 @@
-import pygame,cv2,os
-from copy import copy,deepcopy
+import pygame,cv2,os,sys
 import pygame_init,my_functions
 from stockfish import Stockfish
 from ast import literal_eval
 import chess,chess.pgn
 
 os.system('cls')
+script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 # board.is_checkmate()
 # board.is_stalemate()
@@ -30,7 +30,8 @@ bg_img= pygame.image.load("bg.jpg").convert()
 bg_img = pygame.transform.scale(bg_img, (1080,650))
 
 #Edge coords
-path1 = r'Z:\Program Code\Python\Chess\move0.jpg'
+path1 = script_directory+'\move0.jpg'
+print(f"{path1 = }")
 img = cv2.imread(path1, 1)
 img = cv2.resize(img, (600, 600), interpolation = cv2.INTER_LINEAR)
 
@@ -65,6 +66,9 @@ edge_coords_see_btn = pygame.Rect(640,550,150,50)
 see_yolo_text = gui_font.render('See Camera',True,'white')
 see_yolo_btn = pygame.Rect(820,470,150,50)
 
+reset_text = gui_font.render('Reset',True,'white')
+reset_btn = pygame.Rect(820,470,150,50)
+
 # Initialize StockFish
 stockfish = my_functions.sf()
 current_fen = stockfish.get_fen_position()
@@ -72,11 +76,14 @@ current_fen_img = my_functions.get_board_img(current_fen)
 current_fen_img.convert()
 
 # Labels
+# Stockfish init
 current_eval_string : str = my_functions.get_current_eval_string(stockfish.get_evaluation())
 
 eval_font = pygame.font.SysFont('Calibri',40 ,bold=True)
 eval_bar_text = eval_font.render(current_eval_string,True,'white')
 eval_bar_box = pygame.Rect(640,50,330,50)
+
+
 
 #Pygame loop
 
