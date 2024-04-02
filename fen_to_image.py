@@ -6,16 +6,20 @@ system('cls')
 
 ##Setup Pygame:
 pygame.init()
-width, height = 400,400
+width, height = 1080,650
 screen = pygame.display.set_mode((width, height))
+
+logo = pygame.image.load("./pieces_png/black/Pawn.png").convert_alpha()
+pygame.display.set_caption('CamChess')
+pygame.display.set_icon(logo)
 
 clock = pygame.time.Clock()
 
 
 image = fenToImage(
-	fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+	fen="rnbqkbnr/pp3Qpp/2pp4/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR",
 	squarelength= 50,
-	pieceSet=loadPiecesFolder("./pieces_png"),
+	pieceSet=loadPiecesFolder("./pieces_png",cache=True),
 	darkColor="#D18B47",
 	lightColor="#FFCE9E"
 )
@@ -32,8 +36,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    screen.fill((255,255,255))
     screen.blit(img,(0,0))
     pygame.display.update()
-    clock.tick(10)
+
+
+    clock.tick(60)
     print(clock.get_fps())
 pygame.quit()

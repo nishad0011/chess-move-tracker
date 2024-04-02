@@ -4,6 +4,10 @@ import pygame
 import chess
 import chess.svg
 
+# board.is_checkmate()
+# board.is_stalemate()
+# stockfish.is_move_correct('a2a3')
+
 system('cls')
 
 ##Setup Pygame:
@@ -14,8 +18,6 @@ screen = pygame.display.set_mode((width, height))
 
 board1 = chess.Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 board1.push_san("e4")
-board1.
-display.start(board1.fen())
 boardsvg = io.BytesIO(chess.svg.board(board=board1 , size=1000).encode())
 image = pygame.image.load(boardsvg)
 
