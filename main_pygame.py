@@ -21,7 +21,7 @@ def next_move_funct():
 
     #check if move valid
 
-    #update in stockfish
+    #update in stockfish,fentoimg,
 
 
 screen = pygame_init.initialize()
@@ -31,8 +31,7 @@ bg_img = pygame.transform.scale(bg_img, (1080,650))
 
 #Edge coords
 path1 = script_directory+'\move0.jpg'
-print(f"{path1 = }")
-img = cv2.imread(path1, 1)
+img = cv2.imread(path1,1)
 img = cv2.resize(img, (600, 600), interpolation = cv2.INTER_LINEAR)
 
 with open("cords.txt", "r+") as f:
@@ -55,22 +54,30 @@ gui_font = pygame.font.SysFont('Calibri',20)
 btn_color = (46,50,62)
 
 nextmove_text = gui_font.render('Next Move',True,'white')
-nextmove_btn = pygame.Rect(640,470,150,50)
+nextmove_btn = pygame.Rect(640,490,150,50)
 
 edge_coords_set_text = gui_font.render('Set Board edges',True,'white')
-edge_coords_set_btn = pygame.Rect(820,550,150,50)
+edge_coords_set_btn = pygame.Rect(820,560,150,50)
 
 edge_coords_see_text = gui_font.render('See Mapping',True,'white')
-edge_coords_see_btn = pygame.Rect(640,550,150,50)
+edge_coords_see_btn = pygame.Rect(640,560,150,50)
 
 see_yolo_text = gui_font.render('See Camera',True,'white')
-see_yolo_btn = pygame.Rect(820,470,150,50)
+see_yolo_btn = pygame.Rect(820,490,150,50)
 
 reset_text = gui_font.render('Reset',True,'white')
-reset_btn = pygame.Rect(820,470,150,50)
+reset_btn = pygame.Rect(640,420,150,50)
 
 # Initialize StockFish
 stockfish = my_functions.sf()
+
+# stockfish.make_moves_from_current_position(["e2e4"])
+# stockfish.make_moves_from_current_position(["e7e5"])
+# stockfish.make_moves_from_current_position(["b1c3"])
+# stockfish.make_moves_from_current_position(["d8g5"])
+# stockfish.make_moves_from_current_position(["d2d4"])
+# stockfish.make_moves_from_current_position(["d7d5"])
+
 current_fen = stockfish.get_fen_position()
 current_fen_img = my_functions.get_board_img(current_fen)
 current_fen_img.convert()
@@ -83,7 +90,25 @@ eval_font = pygame.font.SysFont('Calibri',40 ,bold=True)
 eval_bar_text = eval_font.render(current_eval_string,True,'white')
 eval_bar_box = pygame.Rect(640,50,330,50)
 
+best_move_font = pygame.font.SysFont('Calibri',25 ,bold=True)
+best_move_box = pygame.Rect(640,120,330,200)
+best_move_text = best_move_font.render("Best Moves:",True,'white')
 
+best_move_move_font = pygame.font.SysFont('Calibri',20 ,bold=True)
+m1,m2,m3 = 0,0,0
+m1_plot=m2_plot=m3_plot = best_move_move_font.render("Null",True,'white')
+def bm_plot():
+    global m1,m2,m3,m1_plot,m2_plot,m3_plot
+    topmoves = stockfish.get_top_moves(3)
+    m1 = topmoves[0]["Move"]
+    m2 = topmoves[1]["Move"]
+    m3 = topmoves[2]["Move"]
+
+    m1_plot = best_move_move_font.render(m1,True,'white')
+    m2_plot = best_move_move_font.render(m2,True,'white')
+    m3_plot = best_move_move_font.render(m3,True,'white')
+
+bm_plot()
 
 #Pygame loop
 
@@ -99,6 +124,7 @@ while running:
         elif event.type == eval_update_event:
             current_eval_string : str = my_functions.get_current_eval_string(stockfish.get_evaluation())
             eval_bar_text = eval_font.render(current_eval_string,True,'white')
+            bm_plot()
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if edge_coords_see_btn.collidepoint(event.pos):
@@ -113,6 +139,12 @@ while running:
 
             elif nextmove_btn.collidepoint(event.pos):
                 next_move_funct()
+
+            elif reset_btn.collidepoint(event.pos):
+                print("reset")
+
+            elif see_yolo_btn.collidepoint(event.pos):
+                print("show yolo")
 
         elif event.type == pygame.KEYDOWN :
             if event.key == pygame.K_SPACE:
@@ -144,8 +176,26 @@ while running:
                 (see_yolo_btn.x+15,
                  see_yolo_btn.y+15))
 
+    pygame.draw.rect(screen,btn_color,reset_btn)
+    screen.blit(reset_text,
+                (reset_btn.x+15,
+                 reset_btn.y+15))
     
-    screen.blit(current_fen_img,(50,50))
+    pygame.draw.rect(screen,btn_color,best_move_box)
+    screen.blit(best_move_text,
+                (best_move_box.x+15,
+                 best_move_box.y+15))
+    screen.blit(m1_plot,
+                (best_move_box.x+150,
+                 best_move_box.y+50))
+    screen.blit(m2_plot,
+                (best_move_box.x+150,
+                 best_move_box.y+100))
+    screen.blit(m3_plot,
+                (best_move_box.x+150,
+                 best_move_box.y+150))
+    
+    screen.blit(current_fen_img,(40,50))
     
     # Variable Updation
     

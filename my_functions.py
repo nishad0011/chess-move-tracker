@@ -114,7 +114,7 @@ def show_square_mapping(square_coords:dict , img):
 
 def get_current_eval_string(eval:dict):
 	if(eval['type'] == 'cp'):
-		return str("Evaluation: 0."+str( eval.get('value') ) )
+		return str("Evaluation: "+str(int( eval.get('value') )/100) )
 	else: # eval['type'] == 'value'
 		return str("Evaluation: #"+str(eval.get('value') ) )
 
