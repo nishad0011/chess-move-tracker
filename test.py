@@ -9,7 +9,6 @@ node = game.add_variation(chess.Move.from_uci("e2e4"))
 node = node.add_line([chess.Move.from_uci("e7e5")])
 node = node.add_line([chess.Move.from_uci("b1c3")])
 node = node.add_line([chess.Move.from_uci("h7h5")])
-
 print(game[0])
 
 # ll1 = [('black-bishop', 'b3'), 

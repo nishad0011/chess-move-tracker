@@ -11,12 +11,10 @@ stockfish = Stockfish(path="stockfish/stockfish-windows-x86-64-sse41-popcnt", de
 
 #Set board using moves from starting position
 stockfish.set_position()
-stockfish.make_moves_from_current_position(["e2e4"])
+stockfish.make_moves_from_current_position(["f2f3"])
 stockfish.make_moves_from_current_position(["e7e5"])
-stockfish.make_moves_from_current_position(["b1c3"])
-stockfish.make_moves_from_current_position(["d8g5"])
-stockfish.make_moves_from_current_position(["d2d4"])
-stockfish.make_moves_from_current_position(["d7d5"])
+stockfish.make_moves_from_current_position(["g2g4"])
+stockfish.make_moves_from_current_position(["d8h4"])
 
 # game = chess.pgn.Game()
 # node = game.add_variation(chess.Move.from_uci("e2e4"))
@@ -29,10 +27,13 @@ stockfish.make_moves_from_current_position(["d7d5"])
 
 
 topmoves = stockfish.get_top_moves(3)
-m1 = topmoves[0]["Move"]
-m2 = topmoves[1]["Move"]
-m3 = topmoves[2]["Move"]
-print(m1,m2,m3)
+
+print(stockfish.get_evaluation())
+
+# m1 = topmoves[0]["Move"]
+# m2 = topmoves[1]["Move"]
+# m3 = topmoves[2]["Move"]
+# print(m1,m2,m3)
 # print(stockfish.get_fen_position())
 
 

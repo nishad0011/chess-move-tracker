@@ -3,31 +3,59 @@ import pygame_init,my_functions
 from stockfish import Stockfish
 from ast import literal_eval
 import chess,chess.pgn
+from saveimage import get_cur_img
+from YOLOv8py import run_yolo
+from ultralytics import YOLO
 
 os.system('cls')
 script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+move_no = 1
 
 # board.is_checkmate()
 # board.is_stalemate()
 # stockfish.is_move_correct('a2a3')
+# myenv\Scripts\activate
+# pip freeze > requirements.txt
+# pip install -r requirements.txt
 
 def next_move_funct():
-    print('next')
+    global current_eval_string,eval_bar_text,current_fen,current_fen_img,comment_text,comment_box_text,move_no
+    print('Playing...')
     #Capture new image
-
+    move = input_string
     #run yolo model
 
     #Get move played
 
     #check if move valid
+    if (stockfish.is_move_correct(move)):
+        board1 = chess.Board()
+        #make move in sf , update eval and top moves
+        stockfish.make_moves_from_current_position([move])
+        current_eval_string = my_functions.get_current_eval_string(stockfish.get_evaluation())
+        eval_bar_text = eval_font.render(current_eval_string,True,'white')
+        bm_plot()
 
+        #Image
+        current_fen = stockfish.get_fen_position()
+        current_fen_img = my_functions.get_board_img(current_fen)
+        current_fen_img.convert()
+        
+        comment_text = str(move_no)+" Move(s) played"
+        move_no += 1
+        comment_box_text = comment_box_font.render(comment_text,True,'white')
+        
+    else:
+        comment_text = "Incorrect Move. Try again"
+        comment_box_text = comment_box_font.render(comment_text,True,'white')
+        
     #update in stockfish,fentoimg,
 
+print("loading model")
+model = YOLO('./YOLOv8/runs/detect/train/weights/best2.pt')
 
 screen = pygame_init.initialize()
 clock = pygame.time.Clock()
-bg_img= pygame.image.load("bg.jpg").convert()
-bg_img = pygame.transform.scale(bg_img, (1080,650))
 
 #Edge coords
 path1 = script_directory+'\move0.jpg'
@@ -68,6 +96,14 @@ see_yolo_btn = pygame.Rect(820,490,150,50)
 reset_text = gui_font.render('Reset',True,'white')
 reset_btn = pygame.Rect(640,420,150,50)
 
+play_text = gui_font.render('Play',True,'white')
+play_btn = pygame.Rect(640,350,150,50)
+
+input_string = ''
+inputselected = True
+inputfield_text = gui_font.render(input_string,True,'white')
+inputfield_btn = pygame.Rect(820,350,150,50)
+
 # Initialize StockFish
 stockfish = my_functions.sf()
 
@@ -91,8 +127,14 @@ eval_bar_text = eval_font.render(current_eval_string,True,'white')
 eval_bar_box = pygame.Rect(640,50,330,50)
 
 best_move_font = pygame.font.SysFont('Calibri',25 ,bold=True)
-best_move_box = pygame.Rect(640,120,330,200)
+best_move_box = pygame.Rect(640,120,330,100)
 best_move_text = best_move_font.render("Best Moves:",True,'white')
+
+comment_box_font = pygame.font.SysFont('Calibri',20 ,bold=True)
+comment_box_box = pygame.Rect(640,230,330,50)
+
+comment_text = "Playing.."
+comment_box_text = comment_box_font.render(comment_text,True,'white')
 
 best_move_move_font = pygame.font.SysFont('Calibri',20 ,bold=True)
 m1,m2,m3 = 0,0,0
@@ -100,9 +142,13 @@ m1_plot=m2_plot=m3_plot = best_move_move_font.render("Null",True,'white')
 def bm_plot():
     global m1,m2,m3,m1_plot,m2_plot,m3_plot
     topmoves = stockfish.get_top_moves(3)
-    m1 = topmoves[0]["Move"]
-    m2 = topmoves[1]["Move"]
-    m3 = topmoves[2]["Move"]
+
+    if (len(topmoves)==0):
+        m1=m2=m3="-"
+    else:
+        m1 = topmoves[0]["Move"]
+        m2 = topmoves[1]["Move"]
+        m3 = topmoves[2]["Move"]
 
     m1_plot = best_move_move_font.render(m1,True,'white')
     m2_plot = best_move_move_font.render(m2,True,'white')
@@ -127,15 +173,28 @@ while running:
             bm_plot()
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            if inputfield_btn.collidepoint(event.pos):
+                print("inputfield selected")
+                inputselected = True
+
+            else :
+                pass
+                # inputselected = False
+
             if edge_coords_see_btn.collidepoint(event.pos):
                 # Show square mappings
-                my_functions.show_square_mapping(square_coords , img)
+                cur_img = get_cur_img()
+                my_functions.show_square_mapping(square_coords , cur_img)
 
             elif edge_coords_set_btn.collidepoint(event.pos):
                 # Updating Edge and square coords
-                edge_coords = my_functions.get_edge_coords(img)
+                cur_img = get_cur_img()
+                edge_coords = my_functions.get_edge_coords(cur_img)
                 my_functions.update_edge_coords(edge_coords)
-                square_coords = my_functions.get_remaining_coords(edge_coords,img)
+                square_coords = my_functions.get_remaining_coords(edge_coords,cur_img)
+
+            elif play_btn.collidepoint(event.pos):
+                next_move_funct()
 
             elif nextmove_btn.collidepoint(event.pos):
                 next_move_funct()
@@ -144,11 +203,23 @@ while running:
                 print("reset")
 
             elif see_yolo_btn.collidepoint(event.pos):
-                print("show yolo")
+                print("showing yolo")
+                cur_img = get_cur_img()
+                print("Runnimg model")
+                yolo_dictionary = run_yolo(model,cur_img)
+                print("Loading camera")
+                my_functions.see_yolo_working(yolo_dictionary , cur_img , square_coords)
 
-        elif event.type == pygame.KEYDOWN :
-            if event.key == pygame.K_SPACE:
-                next_move_funct()
+        if inputselected:
+            if event.type == pygame.KEYDOWN :
+                if event.key == pygame.K_BACKSPACE:
+                    input_string = input_string[:-1]
+
+                else:
+                    input_string += event.unicode
+
+                inputfield_text = gui_font.render(input_string,True,'white')
+
 
     screen.fill((18,21,28))
 
@@ -181,19 +252,34 @@ while running:
                 (reset_btn.x+15,
                  reset_btn.y+15))
     
+    pygame.draw.rect(screen,btn_color,play_btn)
+    screen.blit(play_text,
+                (play_btn.x+15,
+                 play_btn.y+15))
+    
+    pygame.draw.rect(screen,btn_color,inputfield_btn)
+    screen.blit(inputfield_text,
+                (inputfield_btn.x+15,
+                 inputfield_btn.y+15))
+    
+    pygame.draw.rect(screen,btn_color,comment_box_box)
+    screen.blit(comment_box_text,
+                (comment_box_box.x+15,
+                 comment_box_box.y+15))
+    
     pygame.draw.rect(screen,btn_color,best_move_box)
     screen.blit(best_move_text,
                 (best_move_box.x+15,
                  best_move_box.y+15))
     screen.blit(m1_plot,
-                (best_move_box.x+150,
-                 best_move_box.y+50))
+                (best_move_box.x+50,
+                 best_move_box.y+60))
     screen.blit(m2_plot,
                 (best_move_box.x+150,
-                 best_move_box.y+100))
+                 best_move_box.y+60))
     screen.blit(m3_plot,
-                (best_move_box.x+150,
-                 best_move_box.y+150))
+                (best_move_box.x+250,
+                 best_move_box.y+60))
     
     screen.blit(current_fen_img,(40,50))
     
@@ -206,6 +292,4 @@ while running:
 pygame.quit()
 
 
-""" 
-round(edge_coords_set_btn.width*0.5)-round(edge_coords_see_text.get_width()*0.65) 
-"""
+

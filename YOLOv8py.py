@@ -18,5 +18,5 @@ def run_yolo(model,img):
                   split(result.boxes.xywh[i][2]),
                   split(result.boxes.xywh[i][3]))
             piecebox[i]= [name,bx]
-
+    
     return piecebox

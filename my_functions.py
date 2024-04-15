@@ -1,4 +1,5 @@
 import cv2,pygame,os
+import sys
 from stockfish import Stockfish
 from fentoboardimage import fenToImage, loadPiecesFolder
 
@@ -88,7 +89,7 @@ def get_remaining_coords(edge_coords,img):
 	return square_coords
 
 def sf():
-	stockfish = Stockfish(path="stockfish/stockfish-windows-x86-64-sse41-popcnt", depth=16, parameters={"Threads": 1, "Minimum Thinking Time": 30,"UCI_Elo": 3000})
+	stockfish = Stockfish(path="stockfish/stockfish-windows-x86-64-sse41-popcnt", depth=10, parameters={"Threads": 1, "Minimum Thinking Time": 30,"UCI_Elo": 3000})
 	stockfish.set_position()
 
 	return stockfish
@@ -115,7 +116,50 @@ def show_square_mapping(square_coords:dict , img):
 def get_current_eval_string(eval:dict):
 	if(eval['type'] == 'cp'):
 		return str("Evaluation: "+str(int( eval.get('value') )/100) )
+	elif(eval['type'] == 'mate') and (eval['value'] == 0):
+		return "Checkmate"
 	else: # eval['type'] == 'value'
 		return str("Evaluation: #"+str(eval.get('value') ) )
 
+def see_yolo_working(yolo_dict2:dict,img2,square_coords:dict):
+	color = (0, 255, 0)
+	radius = 5
+	thickness = 2
+	font = cv2.FONT_HERSHEY_SIMPLEX 
+	fontScale = 0.5
+
+	for i in yolo_dict2.items():
+		x = round(i[1][1][0] - 0.5*i[1][1][2])
+		y = round(i[1][1][1] - 0.5*i[1][1][3])
+		wid = round(i[1][1][2])
+		hei = round(i[1][1][3])
+		label = i[1][0]
+		center_of_piece = (round(x+wid*0.5),round(y+hei*0.8))
+
+		#Lables
+		img2  = cv2.putText(img2, label, (x,y-10), font, fontScale, color, 1, cv2.LINE_AA) 
+
+		#Bounding box 
+		img2 = cv2.rectangle(img2, (x,y), (x+wid,y+hei), color, thickness)
+
+		#circles
+		img2 = cv2.circle(img2,center_of_piece,radius,color,thickness)
+
+		min = sys.maxsize
+		sq = "Null"
+		for j in square_coords.items():
+			dist = abs( 
+				((center_of_piece[0]-j[1][0])**2 + (center_of_piece[1]-j[1][1])**2)**0.5
+			)
+			if (dist<min):
+				min = dist
+				sq = j[0]
+		
+		# print(f"piece:{i[1][0]} is on {sq}, dist: {min}")
+  
+		img2 = cv2.line(img2, center_of_piece, square_coords[sq], (0,0,255), thickness) 
+
+	cv2.imshow('img',img2)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 
